@@ -1,0 +1,35 @@
+name: Update SHA256
+
+on:
+  push:
+    paths:
+      - "e.ltn"
+
+permissions:
+  contents: write
+
+jobs:
+  hash:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate SHA256
+        run: sha256sum e.ltn | cut -d ' ' -f1 > e.ltn.sha256
+
+      - name: Commit hash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add e.ltn.sha256
+
+          if git diff --cached --quiet; then
+            echo "Hash hasn't changed"
+            exit 0
+          fi
+
+          git commit -m "Update e.ltn SHA256"
+          git push
